@@ -17,7 +17,7 @@ frontend_branch_name=$(echo "${frontend_branch}" | jq -r '.name')
 if [ "$frontend_branch_name" = "null" ]
 then
       echo "branch $branch doesn't exist in $org:$repo"
-      curl -u "$github_user:$github_pat" https://api.github.com/repos/$org/$repo/actions/workflows/create_ephemeral_env.yml/dispatches -d "{\"ref\":\"$master\",\"inputs\":{\"branch:$frontend_branch_name\"}}"
+      curl -u "$github_user:$github_pat" https://api.github.com/repos/$org/$repo/actions/workflows/create_ephemeral_env.yml/dispatches -d "{\"ref\":\"master\",\"inputs\":{\"branch\":$frontend_branch_name\"}}"
 
 else
       echo "branch $frontend_branch_name exists in $org:$repo"
