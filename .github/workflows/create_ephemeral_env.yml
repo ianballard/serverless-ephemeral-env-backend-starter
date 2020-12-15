@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Trigger frontend workflow
         run: |
-          ./scripts/trigger-frontend-workflow ianballard \
+          ls scripts
+          scripts/trigger-frontend-create-env-workflow ianballard \
             ab78d0fa856e483bd3c52d24bb202c587ce0e5fd \
             ianballard \
             serverless-ephemeral-env-frontend-starter \
