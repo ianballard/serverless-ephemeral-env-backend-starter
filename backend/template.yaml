@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  backend
+
+  Sample SAM Template for backend
+
+Globals:
+  Function:
+    Timeout: 3
+    Environment:
+      Variables:
+        CorsAllowedOrigins: !Ref CorsAllowedOrigins
+
+Parameters:
+  CorsAllowedOrigins:
+    Type: String
+    Description: CORS origins allowed access to the API
+  Branch:
+    Type: String
+    Description: Branch Name. Used if template is creating a stack for an ephemeral env.
+    Default: ""
+
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /api
+            Method: get
+
+  CronJob:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/
+      Handler: app.job
+      Runtime: python3.8
+      Events:
+        CronEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 12 * * ? *)
+#            To demonstrate how to handle cases where resource names are set (causing potential conflicts between stacks)
+            Name: !Join
+              - ''
+              - - 'job-cron-event'
+                - !Ref Branch
+            Description: Job run daily at 12pm
+            Enabled: True
+
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ApiURL:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
