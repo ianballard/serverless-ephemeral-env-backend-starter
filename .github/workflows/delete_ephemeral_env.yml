@@ -22,9 +22,3 @@ jobs:
       - name: Delete Stacks
         run: |
           aws cloudformation delete-stack --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API"
-          BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-StaticSite" \
-            --query 'Stacks[0].Outputs[?OutputKey==`Bucket`].OutputValue' \
-            --output text)
-          aws s3 rb s3://"$BUCKET" --force
-          aws cloudformation delete-stack --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-StaticSite"
