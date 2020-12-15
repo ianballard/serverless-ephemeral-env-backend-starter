@@ -14,37 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: {{GITHUB_HEAD_REF != 'release' }}
     steps:
-#      - uses: actions/checkout@v2
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws-region: us-east-1
-#      - name: Set up Python
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: '3.8'
-#      - name: Install backend dependencies
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install aws-sam-cli==1.2.0
-#      - name: Build backend
-#        run: |
-#          sam build
-#      - name: Deploy backend
-#        run: |
-#          echo "Deploying Api Stack: ${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API"
-#          SUB_DOMAIN="${GITHUB_HEAD_REF#*/}"
-#          SUB_DOMAIN="${SUB_DOMAIN,,}"
-#          sam deploy --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API" \
-#            --region us-east-1 \
-#            --no-fail-on-empty-changeset \
-#            --s3-bucket "$SAM_BUCKET" \
-#            --s3-prefix "$BASE_STACK_NAME" \
-#            --capabilities=CAPABILITY_IAM \
-#            --parameter-overrides CorsAllowedOrigins="https://$SUB_DOMAIN.$DOMAIN_NAME,http://$SUB_DOMAIN.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000" \
-#            Branch="${GITHUB_HEAD_REF#*/}"
+      - uses: actions/checkout@v2
       - name: Trigger frontend workflow
         run: |
           ./scripts/trigger-frontend-workflow ianballard \
