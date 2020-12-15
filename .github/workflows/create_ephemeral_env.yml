@@ -12,7 +12,6 @@ env:
 jobs:
   Build-Deploy-Backend:
     runs-on: ubuntu-latest
-    if: {{GITHUB_HEAD_REF != 'release' }}
     steps:
       - uses: actions/checkout@v2
       - name: Trigger frontend workflow
