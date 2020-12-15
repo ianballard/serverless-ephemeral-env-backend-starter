@@ -1,8 +1,8 @@
-name: Create/Update Ephemeral Env CI/CD
+name: Create Ephemeral Env CI/CD
 on:
   pull_request:
     branches: [ master ]
-    types: [opened, synchronize]
+    types: [opened]
 
 env:
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
