@@ -10,7 +10,7 @@ env:
 jobs:
   Delete-Backend-and-Frontend-Stacks:
     runs-on: ubuntu-latest
-    if: {{GITHUB_HEAD_REF != 'release' }}
+    if: ${{GITHUB_HEAD_REF != 'release' }}
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS Credentials
