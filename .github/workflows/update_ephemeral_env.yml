@@ -12,7 +12,7 @@ env:
 jobs:
   Build-Deploy-Backend:
     runs-on: ubuntu-latest
-    if: $GITHUB_HEAD_REF != 'release'
+    if: github.head_ref != 'release'
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS Credentials
