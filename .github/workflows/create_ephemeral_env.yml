@@ -8,11 +8,15 @@ env:
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
   BASE_STACK_NAME: ${{ secrets.BASE_STACK_NAME }}
   SAM_BUCKET: ${{ secrets.SAM_BUCKET }}
+  GITHUB_USER: ${{ secrets.GITHUB_USER }}
+  GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+  GITHUB_ORG: ${{ secrets.GITHUB_ORG }}
+  GITHUB_REPO: ${{ secrets.GITHUB_REPO }}
 
 jobs:
   Build-Deploy-Backend:
     runs-on: ubuntu-latest
-    if: {{GITHUB_HEAD_REF != 'release' }}
+    if: github.head_ref != 'release'
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS Credentials
@@ -45,3 +49,11 @@ jobs:
             --capabilities=CAPABILITY_IAM \
             --parameter-overrides CorsAllowedOrigins="https://$SUB_DOMAIN.$DOMAIN_NAME,http://$SUB_DOMAIN.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000" \
             Branch="${GITHUB_HEAD_REF#*/}"
+      - name: Trigger frontend workflow
+        run: |
+          scripts/trigger-frontend-create-env-workflow \
+            "$GITHUB_USER" \
+            "$GITHUB_PAT" \
+            "$GITHUB_ORG" \
+            "$GITHUB_REPO" \
+            "$GITHUB_HEAD_REF"
