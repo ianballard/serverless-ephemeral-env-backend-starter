@@ -34,4 +34,4 @@ jobs:
           aws-region: us-east-1
       - name: Delete Stacks
         run: |
-          aws cloudformation delete-stack --stack-name "${STACK_PREFIX"#*/}-$BASE_STACK_NAME-API"
+          aws cloudformation delete-stack --stack-name "${STACK_PREFIX#*/}-$BASE_STACK_NAME-API"
