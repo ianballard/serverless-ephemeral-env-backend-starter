@@ -1,6 +1,7 @@
 import json
 import os
 
+
 def lambda_handler(event, context):
 
     headers = event['headers']
@@ -14,9 +15,10 @@ def lambda_handler(event, context):
         },
         "statusCode": 200,
         "body": json.dumps({
-            "message": "hello world! test a-1",
+            "message": "hello world!",
         }),
     }
+
 
 def job(event, context):
     return "job ran"

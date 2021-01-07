@@ -8,6 +8,7 @@ env:
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
   BASE_STACK_NAME: ${{ secrets.BASE_STACK_NAME }}
   SAM_BUCKET: ${{ secrets.SAM_BUCKET }}
+  REUSABLE_CDN_DOMAIN: ${{ secrets.REUSABLE_CDN_DOMAIN }}
 
 jobs:
   Build-Deploy-Backend:
@@ -43,5 +44,5 @@ jobs:
             --s3-bucket "$SAM_BUCKET" \
             --s3-prefix "$BASE_STACK_NAME" \
             --capabilities=CAPABILITY_IAM \
-            --parameter-overrides CorsAllowedOrigins="https://$SUB_DOMAIN.$DOMAIN_NAME,http://$SUB_DOMAIN.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000" \
-            Branch="${GITHUB_HEAD_REF#*/}"
+            --parameter-overrides CorsAllowedOrigins="https://$DOMAIN_NAME,https://*.$DOMAIN_NAME,http://*.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000,${REUSABLE_CDN_DOMAIN}" \
+            StackPrefix="${GITHUB_HEAD_REF#*/}"
