@@ -16,9 +16,9 @@ Parameters:
   CorsAllowedOrigins:
     Type: String
     Description: CORS origins allowed access to the API
-  Branch:
+  StackPrefix:
     Type: String
-    Description: Branch Name. Used if template is creating a stack for an ephemeral env.
+    Description: Stack Prefix. Used if template is creating a stack for an ephemeral env.
     Default: ""
 
 
@@ -51,7 +51,7 @@ Resources:
             Name: !Join
               - ''
               - - 'job-cron-event'
-                - !Ref Branch
+                - !Ref StackPrefix
             Description: Job run daily at 12pm
             Enabled: True
 

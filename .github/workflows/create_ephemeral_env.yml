@@ -1,5 +1,13 @@
 name: Create Ephemeral Env CI/CD
 on:
+
+  workflow_dispatch:
+    inputs:
+      stack_prefix:
+        description: 'Alternate stack prefix'
+        required: true
+        default: ''
+
   pull_request:
     branches: [ master ]
     types: [opened]
@@ -8,16 +16,23 @@ env:
   DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
   BASE_STACK_NAME: ${{ secrets.BASE_STACK_NAME }}
   SAM_BUCKET: ${{ secrets.SAM_BUCKET }}
-  GITHUB_USER: ${{ secrets.GITHUB_USER }}
-  GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
-  GITHUB_ORG: ${{ secrets.GITHUB_ORG }}
-  GITHUB_REPO: ${{ secrets.GITHUB_REPO }}
+  STACK_PREFIX: ${{ github.event.inputs.stack_prefix }}
+  REUSABLE_CDN_DOMAIN: ${{ secrets.REUSABLE_CDN_DOMAIN }}
+  GH_USER: ${{ secrets.GH_USER }}
+  GH_PAT: ${{ secrets.GH_PAT }}
+  GH_ORG: ${{ secrets.GH_ORG }}
+  GH_REPO: ${{ secrets.GH_REPO }}
 
 jobs:
   Build-Deploy-Backend:
     runs-on: ubuntu-latest
     if: github.head_ref != 'release'
     steps:
+      - name: Set default stack prefix
+        if: env.STACK_PREFIX == ''
+        run: |
+          echo "STACK_PREFIX=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          echo "Set Default Stack Prefix: $STACK_PREFIX"
       - uses: actions/checkout@v2
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -38,22 +53,23 @@ jobs:
           sam build
       - name: Deploy backend
         run: |
-          echo "Deploying Api Stack: ${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API"
-          SUB_DOMAIN="${GITHUB_HEAD_REF#*/}"
+          echo "Deploying Api Stack: ${STACK_PREFIX#*/}-$BASE_STACK_NAME-API"
+          SUB_DOMAIN="${STACK_PREFIX#*/}"
           SUB_DOMAIN="${SUB_DOMAIN,,}"
-          sam deploy --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API" \
+          sam deploy --stack-name "${STACK_PREFIX#*/}-$BASE_STACK_NAME-API" \
             --region us-east-1 \
             --no-fail-on-empty-changeset \
             --s3-bucket "$SAM_BUCKET" \
             --s3-prefix "$BASE_STACK_NAME" \
             --capabilities=CAPABILITY_IAM \
-            --parameter-overrides CorsAllowedOrigins="https://$SUB_DOMAIN.$DOMAIN_NAME,http://$SUB_DOMAIN.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000" \
-            Branch="${GITHUB_HEAD_REF#*/}"
+            --parameter-overrides StackPrefix="${STACK_PREFIX#*/}" \
+            CorsAllowedOrigins="https://$DOMAIN_NAME,https://*.$DOMAIN_NAME,http://*.$DOMAIN_NAME.s3-website-us-east-1.amazonaws.com,http://localhost:3000,${REUSABLE_CDN_DOMAIN}"
       - name: Trigger frontend workflow
+        if: github.event.inputs.stack_prefix == ''
         run: |
           scripts/trigger-frontend-create-env-workflow \
-            "$GITHUB_USER" \
-            "$GITHUB_PAT" \
-            "$GITHUB_ORG" \
-            "$GITHUB_REPO" \
-            "$GITHUB_HEAD_REF"
+            "$GH_USER" \
+            "$GH_PAT" \
+            "$GH_ORG" \
+            "$GH_REPO" \
+            "$STACK_PREFIX"

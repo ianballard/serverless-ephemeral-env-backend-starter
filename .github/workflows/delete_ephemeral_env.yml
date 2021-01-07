@@ -1,18 +1,31 @@
 name: Delete Ephemeral Env CI/CD
 on:
+
+  workflow_dispatch:
+    inputs:
+      stack_prefix:
+        description: 'Alternate stack prefix'
+        required: true
+        default: ''
+
   pull_request:
     branches: [ master ]
     types: [closed]
 
 env:
   BASE_STACK_NAME: ${{ secrets.BASE_STACK_NAME }}
+  STACK_PREFIX: ${{ github.event.inputs.stack_prefix }}
 
 jobs:
   Delete-Backend-and-Frontend-Stacks:
     runs-on: ubuntu-latest
     if: github.head_ref != 'release'
     steps:
-      - uses: actions/checkout@v2
+      - name: Set default stack prefix
+        if: env.STACK_PREFIX == ''
+        run: |
+          echo "STACK_PREFIX=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          echo "Set Default Stack Prefix: $STACK_PREFIX"
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -21,4 +34,4 @@ jobs:
           aws-region: us-east-1
       - name: Delete Stacks
         run: |
-          aws cloudformation delete-stack --stack-name "${GITHUB_HEAD_REF#*/}-$BASE_STACK_NAME-API"
+          aws cloudformation delete-stack --stack-name "${STACK_PREFIX"#*/}-$BASE_STACK_NAME-API"
