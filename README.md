@@ -1,17 +1,17 @@
 # serverless-ephemeral-env-starter
 
-### Use this repo to set up ephemeral testing environments for your AWS serverless app
-**Note**: This repo is meant for serverless apps deployed in AWS only.
+### Use this repo to set up ephemeral testing environments for your AWS serverless app 
+**Note**: This repo is meant for serverless apps deployed in AWS only AND is part of an app that consists of 2 repos. 
+The other is [serverless-ephemeral-env-frontend-starter](https://github.com/ianballard/serverless-ephemeral-env-frontend-starter)
 
-This repo is a template that you can use to enhance your development lifecycle. The project is a React frontend, 
-with an [aws sam](https://aws.amazon.com/serverless/sam/)
+This repo is a template that you can use to enhance your development lifecycle. It builds off of 
+[serverless-ephemeral-env-starter](https://github.com/ianballard/serverless-ephemeral-env-starter) where the project has
+a separate repo for frontend and backend to mock a different real world scenario.
+The project is an [aws sam](https://aws.amazon.com/serverless/sam/)
 Python 3 backend but is kept as bare-bones as possible; it is meant to be fairly interchangeable. 
-- **Note**: you can swap out React, and Python if you wish. ie the frontend could just as easily be Angular, 
-and the backend Node.js.
+- **Note**: you can swap out Python if you wish. ie the backend could easily be Node.js.
 
-At the core of this project is a fairly simple CDK app influenced by this aws-cdk
-[static-site](https://github.com/aws-samples/aws-cdk-examples/tree/master/typescript/static-site) app and a few
-[github actions](https://docs.github.com/en/free-pro-team@latest/actions).
+At the core of this project is a few [github actions](https://docs.github.com/en/free-pro-team@latest/actions).
 
 The key github action workflow is as follows:
 1. A pull request is opened
@@ -30,11 +30,7 @@ into a longer-lived branch/ environment (develop, master, etc.).
 Ephemeral environments allow projects achieve a higher rates of agility as many features can be tested simultaneously 
 without having to first merge the features into a long-lived branch. When code is merged into a long-lived branch, you 
 are no longer able to *easily* pull individual features out if priorities change, the feature is not working, or any other 
-reason; the possibilities for this are endless. 
-
-### Live Sites
- - [master](http://serverless-ephemeral-env-starter.s3-website-us-east-1.amazonaws.com/)
- - [feature/A-1](http://a-1.serverless-ephemeral-env-starter.s3-website-us-east-1.amazonaws.com/)
+reason; the possibilities for this are endless.
 
 ### Prerequisites
 1. [aws account](https://aws.amazon.com/free)
@@ -43,7 +39,6 @@ reason; the possibilities for this are endless.
 3. [configure aws-cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 4. [aws-cdk](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
 5. [aws sam](https://aws.amazon.com/serverless/sam/)
-6. [npm](https://www.npmjs.com/get-npm)
 
 
 ## How to use this project
@@ -81,43 +76,31 @@ reason; the possibilities for this are endless.
     Otherwise, do not add it to the secrets.
         - **Note**  deploying to cloudfront has many dependencies that require validation and can increase deployment 
         times to upwards of 30 minutes, and in some cases can cause timeouts.
-    - REUSABLE_CDN - set this to true if you do want to reuse the same cloudfront distribution for all ephemeral environments.
-      Otherwise, do not add it to the secrets. 
-        - **Note**  Setting this will create a Lambda@Edge function that is run at each cloudfront edge location upon 
-          each origin(s3 bucket hosting the frontend code) request and will route to the origin specified by a cookie 
-          called "origin". In other words, set the origin cookie in your browser to be routed to the origin of your 
-          choosing. Note, you may need to clear your browser cache each time you change the cookie's value.
+    - REUSABLE_CDN_DOMAIN - domain of your main cdn created in the steps of 
+      [serverless-ephemeral-env-frontend-starter](https://github.com/ianballard/serverless-ephemeral-env-frontend-starter)
+    - GH_USER - github user that will be used as a service role to make github api requests in during workflows.   
+    - GH_PAT - github user auth token used for auth on github api requests
+    - GH_ORG - org / username where the frontend repo is hosted
+    - GH_REPO - frontend repo name 
 
-5. Create your main Static Site Stack (this should be a one time operation)
-    - Navigate to ./infra
-    - run `npm run build`
-    - If you have a registered domain and wish to deploy to cloudfront (if you want to reuse the same cloudfront 
-      distribution, add the `-c reusableCDN=true` to the following commands).
-        - If wish to deploy to 
-        [cloudfront](https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-https-requests-s3/) you need 
-        to have this registered with a domain registrar like 
-        ([route 53](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html)).
-        - run `cdk diff -c domain=<your website domain>`
-        - run `cdk deploy -c domain=<your website domain> --all`
-    - If you do not have a registered domain or do not wish to deploy to cloudfront 
-    (this will only use [s3 site hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html))
-        - run `cdk diff -c domain=<your website domain> -c excludeCDN=true`
-        - run `cdk deploy -c domain=<your website domain> -c excludeCDN=true --all`
-6. Build and deploy your main backend (master)
+5. Build and deploy your main backend (master)
     - Check out master locally
     - Navigate to ./backend/app
     - On line 17, change "hello world" to any message you want
     - Push this change to the remote master branch. This will kick off the Main CI/CD github action.
         - You can view the status of your action in your project repo and select the Actions tab.
     - After this completes your "prod" environment is up and running.
-7. Create a feature branch off of master. You can use gitflow naming conventions or just any old name you want.
+6. Create a feature branch off of master. You can use gitflow naming conventions or just any old name you want.
     - Navigate to ./backend/app
     - Once again, on line 17, change the message.
     - Push this change to the remote feature branch. 
     - Open a pull request for this branch to be merged into master. 
         - This will kick off the Create Ephemeral Env CI/CD github action.
         - You can view the status of your action in your project repo and select the Actions tab.
-        - If you have EXCLUDE_EPHEMERAL_CDN set to true in your repository secrets, this process can take 3-5 minutes. 
+        - The final step of the job is to trigger a frontend build. If there is a matching frontend branch name it will 
+          create a pull request and therefore a new environment with that code with the new backend api. Otherwise, the 
+          frontend master branch will be used.
+        - If you have EXCLUDE_EPHEMERAL_CDN set to true in your frontend repository secrets, this process can take 3-5 minutes. 
         After it is done your ephemeral environment is up and running. You can navigate to it by entering 
         http://{{branch name (lowercase & exclude gitflow prefix)}}.{{your domain name}}.s3-website-us-east-1.amazonaws.com
         in your browser.
