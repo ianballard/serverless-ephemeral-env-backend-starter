@@ -2,6 +2,8 @@
 
 ### Use this repo to set up ephemeral testing environments for your AWS serverless app 
 **Note**: This repo is meant for serverless apps deployed in AWS only AND is part of an app that consists of 2 repos. 
+Set this one up first!
+
 The other is [serverless-ephemeral-env-frontend-starter](https://github.com/ianballard/serverless-ephemeral-env-frontend-starter)
 
 This repo is a template that you can use to enhance your development lifecycle. It builds off of 
@@ -12,6 +14,12 @@ Python 3 backend but is kept as bare-bones as possible; it is meant to be fairly
 - **Note**: you can swap out Python if you wish. ie the backend could easily be Node.js.
 
 At the core of this project is a few [github actions](https://docs.github.com/en/free-pro-team@latest/actions).
+
+
+###Preface
+The implementation is influenced by this proof of concept repository: https://github.com/ianballard/serverless-ephemeral-env-starter.
+
+It's recommended to not create new TLS certificates/ Cloudfront distrubutions for each new ephemeral environment.
 
 The key github action workflow is as follows:
 1. A pull request is opened
@@ -121,3 +129,27 @@ reason; the possibilities for this are endless.
     - This will also kick off the Main CI/CD github action and deploy the branch to prod.
     - Make sure the message you changed in the backend is displayed on your prod site.
     
+
+### Dev lifecycle workflow
+## Workflows:
+
+1. Create / update pull request: creates or updates a backend stack with AWS SAM
+    - Sets up environment with python, and aws-sam-cli
+    - Builds backend app with AWS SAM and the template.test.yaml (different than main template.yaml for the time being in case unforeseen issues arose).
+    - Deploys an AWS CloudFormation stack 
+        - AWS SAM will upload the template to sam-bucket based on the secret defined above
+        - The HEAD branch (minus branch prefixes) and a whole set of parameters used in template.yaml are passed in as parameter overrides to the template.
+        - The ApiURL is an output of the SAM template which is used during the frontend build so it knows what API to hit.
+    - The frontend Create Ephemeral Env CI/CD workflow is triggered.
+2. Close / merge a pull request: deletes the backend stack with AWS CLI
+
+### Testing Environments with reusable cdn
+1. Navigate to your CDN this demo is [https://du0krbmigxf0m.cloudfront.net](https://du0krbmigxf0m.cloudfront.net)
+2. Enter the branch to test. This sets a cookie named origin to the branch name which is used for routing purposes.
+    - If the branch entered was incorrect, you will see an error: NoSuchBucket. 
+    - Clear your cookie or clear your browser cache 
+    - Double check the branch name 
+    - Refresh the page 
+    - If you see the same error, check your cloudformation stacks to make ure it was deployed
+3. After testing is complete, or you need to test another branch, clear your cookies or browser cache and start from 
+      step 1
