@@ -54,8 +54,6 @@ jobs:
       - name: Deploy backend
         run: |
           echo "Deploying Api Stack: ${STACK_PREFIX#*/}-$BASE_STACK_NAME-API"
-          SUB_DOMAIN="${STACK_PREFIX#*/}"
-          SUB_DOMAIN="${SUB_DOMAIN,,}"
           sam deploy --stack-name "${STACK_PREFIX#*/}-$BASE_STACK_NAME-API" \
             --region us-east-1 \
             --no-fail-on-empty-changeset \
