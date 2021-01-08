@@ -144,7 +144,7 @@ reason; the possibilities for this are endless.
 2. Close / merge a pull request: deletes the backend stack with AWS CLI
 
 ### Testing Environments with reusable cdn
-1. Navigate to your CDN this demo is [https://du0krbmigxf0m.cloudfront.net](https://du0krbmigxf0m.cloudfront.net)
+1. Navigate to your CDN (this demo is [https://du0krbmigxf0m.cloudfront.net](https://du0krbmigxf0m.cloudfront.net))
 2. Enter the branch to test. This sets a cookie named origin to the branch name which is used for routing purposes.
     - If the branch entered was incorrect, you will see an error: NoSuchBucket. 
     - Clear your cookie or clear your browser cache 
